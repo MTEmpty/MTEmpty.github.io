@@ -1,0 +1,131 @@
+<!doctype html>
+	<head>
+		<style>
+			/* CSS comes here */
+			body {
+			    font-family:arial;
+			}
+			input {
+			    padding: 10px;
+			    width: 300px;
+			    border-radius: 5px;
+			    border: solid 2px #BBB;
+			}
+			div {
+			    margin:10px 0px;
+			}
+			button {
+			    padding:10px;
+			    background-color:#6a67ce;
+			    color: #FFFFFF;
+			    border: 0px;
+			    cursor:pointer;
+			    border-radius: 5px;
+			}
+		</style>
+		<title>Misc Countdown</title>
+	</head>
+	<body>
+	    <h2>Misc Countdown</h2>
+		<div>
+			<p>This random countdown timer will have an alert at half time, quater time, and with 1 minute left.
+			   So this will be best for random countdown greater than 5 or so minutes.
+			</p>
+		</div>
+		<div>
+			<input type="text" id="count-down-duration" value="5"/>
+		</div>
+		<div>
+			<small>
+				<b>NOTE:</b> Enter a duration in minutes and click on start button.
+			</small>
+		</div>
+		<br/>
+		<div>
+			<button type="button" onclick="countdown()">Start countdown</button>
+		</div>
+
+		<p id="time_remaining" style="font-size:20px;"></p>
+        
+		<script>
+			async function countdown() {
+				// The duration is inputted as minutes, converted to milliseconds
+				let duration = parseFloat(document.getElementById("count-down-duration").value) * 60 * 1000
+				console.log('Total countdown: ' + duration);
+
+				let half_duration = duration / 2
+				console.log('Half countdown: ' + half_duration);
+
+				let quarter_duration = duration / 4
+				console.log('Quater countdown: ' + quarter_duration);
+
+				now = new Date().getTime();
+				target_time = now + (duration)
+
+				await updateTimer(half_duration)
+				textToAudio('half time now')
+
+				await updateTimer(quarter_duration)
+				textToAudio('quater time now')
+
+				await updateTimer(60 * 1000)
+				textToAudio('one minute left')
+
+				await updateTimer(0)
+				textToAudio('Times up')
+			}
+
+			async function updateTimer(breaker) {
+				
+				do {
+					now = new Date().getTime();
+					time_left = target_time - now;
+
+					let minutes = Math.floor((time_left % (1000 * 60 * 60)) / (1000 * 60));
+					let seconds = Math.floor((time_left % (1000 * 60)) / 1000);
+
+					let timer_str = onlyPositive(minutes) + 'mins ' + onlyPositive(seconds) + 'seconds';
+					
+					await sleep(1000)
+
+					if (time_left < 0) {
+						console.log('All done');
+						document.getElementById("time_remaining").innerHTML = "DONE";
+					}
+					else {
+						document.getElementById("time_remaining").innerHTML = timer_str;
+					}
+				}
+				while (time_left > breaker);
+				console.log('loop finished')
+				return 'done';
+			}
+
+			function sleep(time) {
+				console.log('Time to wait in milliseconds: ' + time);
+				return new Promise(resolve => setTimeout(resolve, time));
+			}
+
+            function textToAudio(msg) {
+                
+                let speech = new SpeechSynthesisUtterance();
+                speech.lang = "en-US";
+                
+                speech.text = msg;
+                speech.volume = 1;
+                speech.rate = 1;
+                speech.pitch = 1;
+                
+                window.speechSynthesis.speak(speech);
+            }
+
+			function onlyPositive(number) {
+				let result = 0
+				if (number > 0) {
+					result = number
+				}
+				return result
+			}
+		</script>
+	</body>
+</html>
